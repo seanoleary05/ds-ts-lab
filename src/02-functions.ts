@@ -49,6 +49,7 @@ function sortColleagues(
 
 console.log(sortColleagues(colleagues.current, (a, b) => a.contact.extension - b.contact.extension, 3));
 console.log(sortColleagues(colleagues.current, (a, b) => a.name.length - b.name.length, 1));
+console.log(sortColleagues(colleagues.current, (a, b) => (a.name.length - b.name.length))); // NEW
 
 function findFriends(friends: Friend[],
   condition: (friend: Friend) => boolean)
@@ -59,5 +60,20 @@ function findFriends(friends: Friend[],
   return names;
 }
 
+function addInterest(f: Friend, int: string) {
+  if (f.interests === undefined) {
+    f.interests = [];
+  }
+  f.interests?.push(int);
+  return f.interests;
+
+  
+
+}
+
 //console.log(findFriends(friends, (friend) => friend.name.startsWith('Pa')));
 //console.log(findFriends(friends, (friend) => friend.age < 35));
+
+
+console.log(addInterest(friends[1], "climbing"));
+console.log(addInterest(friends[0], "running"));
