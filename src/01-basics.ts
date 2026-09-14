@@ -5,16 +5,19 @@ const friend1: Friend = {
   name: "Paul Fleming",
   phone: "087-12345",
   age: 25,
+  dob: new Date(1998, 5, 12),
 };
 
 const friend2: Friend = {
   name: "Jane Costello",
   phone: "086--12345",
   age: 31,
+  interests: ["reading", "hiking", "cooking"],
 };
 
 export const friends: Friend[] = [friend1, friend2];
-//console.log(friends[1]);
+console.log(friends[1]);
+console.log(friends[0]);
 
 //   -------------------
 const colleague1: Colleague = {

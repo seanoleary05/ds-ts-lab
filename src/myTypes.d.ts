@@ -2,7 +2,10 @@
 export interface Friend {
     name: string;
     phone: string;
+    dob?: Date;
     age: number
+    interests?: string[]
+    // dob and interests are optional properties
 }
 
 export interface Colleague {
