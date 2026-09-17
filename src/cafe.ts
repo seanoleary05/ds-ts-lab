@@ -1,4 +1,8 @@
-import {soup, risotto, brownie, menu, lunchCombo, currentOrder, MenuItem, OrderLine } from "./menuTypes";
+import { 
+    MenuItem, 
+    ComboDeal, 
+    OrderLine, 
+} from "./menuTypes";
 // ---------------------------------------------------------------
 // 2. FUNCTIONS
 // ---------------------------------------------------------------
@@ -8,8 +12,12 @@ import {soup, risotto, brownie, menu, lunchCombo, currentOrder, MenuItem, OrderL
 //     rely on *type inference* (check the inferred signature with VS Code's
 //     intellisense before you decide).
 
-function describe(item: MenuItem) {
-  return `${item.name} (${item.course}) - EUR ${item.price.toFixed(2)}`;
+function describe(item: MenuItem | ComboDeal) {
+    if ("nutrition" in item) { // check if item is a MenuItem
+    return `${item.name} (${item.course}) - EUR ${item.price.toFixed(2)}`;
+   }
+   return `${item.name} (combo) - EUR ${item.price.toFixed(2)}`;        
+    
 }
 
 // TS: An OrderLine is a union, so this function must *narrow* the type before
@@ -17,9 +25,9 @@ function describe(item: MenuItem) {
 //     operator - a ComboDeal has an 'items' property, a MenuItem does not.
 function lineTotal(line: OrderLine) {
   if ("items" in line) {
-    return line.price; // Combos are sold at their bundle price.
+    return line.price; // ComboDeal
   }
-  return line.price;
+  return line.price; // MenuItem
 }
 
 function orderTotal(lines: OrderLine[]) {
@@ -52,6 +60,79 @@ function updateItem(item: MenuItem, changes: Partial<MenuItem>) {
   return { ...item, ...changes };
 }
 
+// TS: The kitchen ticket needs the name and course of an item, and nothing
+//     else - and it must not be modifiable once created. Declare its type by
+//     composing two utility types: Readonly<Pick<...>>.
+function kitchenTicket(item: MenuItem) {
+  return {
+    name: item.name,
+    course: item.course,
+  };
+}
+
+// TS: An allergy card is a MenuItem without its nutrition property, but with a
+//     'warning' string added. Declare its type with Omit<> and an intersection
+//     (&) - see the EventPass example in the Utility Types section.
+function allergyCard(item: MenuItem) {
+  return {
+    id: item.id,
+    name: item.name,
+    course: item.course,
+    price: item.price,
+    warning: `Contains: ${item.nutrition.allergens.join(", ")}`,
+  };
+}
+export const soup: MenuItem = {
+  id: 1,
+  name: "Roast Tomato Soup",
+  course: "starter",
+  price: 5.5,
+  nutrition: {
+    calories: 180,
+    allergens: ["celery"],
+  },
+};
+
+ const risotto: MenuItem = {
+  id: 2,
+  name: "Mushroom Risotto",
+  // TS: 'course' should only ever be one of three values. Declare a *literal
+  //     (union) type* called Course - "starter" | "main" | "dessert" - and use
+  //     it as the property's type instead of string. One of the objects below
+  //     will then fail to compile. Good.
+  course: "main",
+  price: 14.0,
+  nutrition: {
+    calories: 620,
+    allergens: ["milk"],
+  },
+  availableFrom: new Date(2024, 5, 1),
+  discountPercent: 10   
+};
+
+ const brownie: MenuItem = {
+  id: 3,
+  name: "Chocolate Brownie",
+  course: "dessert",
+  price: 6.0,
+  nutrition: {
+    calories: 450,
+    allergens: ["milk", "eggs", "gluten"],
+  },
+};
+
+ const menu = [soup, risotto, brownie];
+
+// TS: A combo is a named bundle of menu items sold at a fixed price. Declare a
+//     second interface for it (ComboDeal: id, name, items, price).
+ const lunchCombo: ComboDeal = {
+  id: 101,
+  name: "Soup & Sweet",
+  items: [soup, brownie],
+  price: 10.0,
+};
+
+ const currentOrder = [risotto, lunchCombo, soup];
 
 
 console.log(describe(risotto));
@@ -70,6 +151,6 @@ console.log(allergyCard(brownie));
 
 // TS: Three more lines below are bugs that only the compiler can see. Once
 //     your types are in place, fix each one and note it in your commit message.
-console.log(describe(lunchCombo));
-console.log(updateItem(soup, { price: "7.00" }));
-console.log(firstMatch(menu, (i) => i.calories < 300));
+console.log(describe(lunchCombo)); // change describe function to accept ComboDeal as well as MenuItem
+console.log(updateItem(soup, { price: 7.00 })); // pass number as opposed to string
+console.log(firstMatch(menu, (i) => i.nutrition.calories < 300)); // change i.calories to i.nutrition.calories
